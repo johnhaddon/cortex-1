@@ -37,25 +37,23 @@
 
 #include <cassert>
 
+#include "boost/utility/enable_if.hpp"
+#include "boost/type_traits/is_same.hpp"
+
 namespace IECore
 {
 
-template<typename T, typename S>
-boost::intrusive_ptr<T> runTimeCast( const boost::intrusive_ptr<S> &src )
+namespace Detail
 {
-	if( !src )
-	{
-		return 0;
-	}
-	if( src->isInstanceOf( T::staticTypeId() ) )
-	{
-		return boost::static_pointer_cast<T>( src );
-	}
-	return 0;
+
+template<typename T, typename S>
+T *runTimeCastInternal( S *src, typename boost::enable_if< boost::is_same< T, S > >::type *enabler = NULL )
+{
+	return src;
 }
 
 template<typename T, typename S>
-T *runTimeCast( S *src )
+T *runTimeCastInternal( S *src, typename boost::disable_if< boost::is_same< T, S > >::type *enabler = NULL )
 {
 	if( !src )
 	{
@@ -66,6 +64,20 @@ T *runTimeCast( S *src )
 		return static_cast<T *>( src );
 	}
 	return 0;
+}
+
+} // namespace Detail
+
+template<typename T, typename S>
+boost::intrusive_ptr<T> runTimeCast( const boost::intrusive_ptr<S> &src )
+{
+	return Detail::runTimeCastInternal<T>( src.get() );
+}
+
+template<typename T, typename S>
+T *runTimeCast( S *src )
+{
+	return Detail::runTimeCastInternal<T>( src );
 }
 
 template<typename T, typename S>
