@@ -76,6 +76,11 @@ class SimpleDataHolder
 			h.append( readable() );
 		}
 		
+		bool shared() const
+		{
+			return false;
+		}
+		
 	private :
 	
 		T m_data;
@@ -140,6 +145,11 @@ class SharedDataHolder
 				m_data->hashValid = true;
 			}
 			h.append( m_data->hash );
+		}
+
+		bool shared() const
+		{
+			return m_data->refCount() > 1;
 		}
 
 	protected :

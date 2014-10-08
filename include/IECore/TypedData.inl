@@ -66,18 +66,6 @@ inline size_t sizeOf<void>()
 	return 0;
 }
 
-template<typename T>
-inline bool shareable( const T &t )
-{
-	return false;
-}
-
-template<typename T>
-inline bool shareable( const SharedDataHolder<T> &t )
-{
-	return true;
-}
-
 } // namespace Detail
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -196,9 +184,9 @@ template<class T>
 void TypedData<T>::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 {
 	Data::memoryUsage( accumulator );
-	if( Detail::shareable( m_data ) )
+	if( m_data.shared() )
 	{
-		// We may be sharing our data with another object using
+		// We're sharing our data with another object using
 		// lazy-copy-on-write. We must tell the MemoryAccumulator
 		// what address our storage is at, so it can avoid double
 		// counting.

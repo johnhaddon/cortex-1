@@ -237,7 +237,14 @@ void StringVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) con
 		count += iterV->capacity();
 		iterV++;
 	}
-	accumulator.accumulate( &readable(), sizeof(std::vector<string>) + count );
+	if( m_data.shared() )
+	{
+		accumulator.accumulate( &readable(), sizeof(std::vector<string>) + count );
+	}
+	else
+	{
+		accumulator.accumulate( sizeof(std::vector<string>) + count );	
+	}
 }
 
 // the boolean type need it's own io, hash and memoryUsage so we don't use the whole macro for it's specialisations either
@@ -252,7 +259,14 @@ template<>
 void BoolVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 {
 	Data::memoryUsage( accumulator );
-	accumulator.accumulate( &readable(), sizeof(std::vector<bool>) + readable().capacity() / 8 );
+	if( m_data.shared() )
+	{
+		accumulator.accumulate( &readable(), sizeof(std::vector<bool>) + readable().capacity() / 8 );
+	}
+	else
+	{
+		accumulator.accumulate( sizeof(std::vector<bool>) + readable().capacity() / 8 );		
+	}
 }
 
 template<>
