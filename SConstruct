@@ -9,6 +9,8 @@
 #
 #  Copyright 2012, Electric Theatre Collective Limited. All rights reserved.
 #
+#  Copyright 2019, Hypothetical Inc. All rights reserved. 
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -74,26 +76,27 @@ except NameError :
 	# fallback for old scons versions
 	o = Options( optionsFile, ARGUMENTS )
 
-o.Add(
-	"CXX",
-	"The C++ compiler.",
-	"g++",
-)
+if Environment()["PLATFORM"] != "win32" :
+	o.Add(
+		"CXX",
+		"The C++ compiler.",
+		"g++",
+	)
+
+	o.Add(
+		"CXXSTD",
+		"The C++ standard to build against.",
+		"c++11",
+	)
+
+	o.Add(
+		BoolVariable( "ASAN", "Enable ASan when compiling with clang++", False)
+	)
 
 o.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-pipe", "-Wall" ]
-)
-
-o.Add(
-	"CXXSTD",
-	"The C++ standard to build against.",
-	"c++11",
-)
-
-o.Add(
-	BoolVariable( "ASAN", "Enable ASan when compiling with clang++", False)
+	[ "-pipe", "-Wall" ] if Environment()["PLATFORM"] != "win32" else []
 )
 
 o.Add(
@@ -120,13 +123,13 @@ o.Add(
 o.Add(
 	"TBB_INCLUDE_PATH",
 	"The path to the tbb include directory.",
-	"/usr/local/include/tbb",
+	"/usr/local/include/tbb" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
 	"TBB_LIB_PATH",
 	"The path to the tbb library directory.",
-	"/usr/local/lib",
+	"/usr/local/lib" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
@@ -141,13 +144,13 @@ o.Add(
 o.Add(
 	"BOOST_INCLUDE_PATH",
 	"The path to the boost include directory.",
-	"/usr/include",
+	"/usr/include" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
 	"BOOST_LIB_PATH",
 	"The path to the boost library directory.",
-	"/usr/lib",
+	"/usr/lib" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
@@ -163,13 +166,13 @@ o.Add(
 o.Add(
 	"OPENEXR_INCLUDE_PATH",
 	"The path to the OpenEXR include directory.",
-	"/usr/include/OpenEXR",
+	"/usr/include/OpenEXR" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
 	"OPENEXR_LIB_PATH",
 	"The path to the OpenEXR lib directory.",
-	"/usr/lib",
+	"/usr/lib" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
@@ -196,13 +199,13 @@ o.Add(
 o.Add(
 	"FREETYPE_INCLUDE_PATH",
 	"The path to the FreeType include directory.",
-	"/usr/include/freetype2",
+	"/usr/include/freetype2" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
 	"FREETYPE_LIB_PATH",
 	"The path to the FreeType lib directory.",
-	"/usr/local/lib",
+	"/usr/local/lib" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 # OSL options
@@ -210,13 +213,13 @@ o.Add(
 o.Add(
 	"OSL_INCLUDE_PATH",
 	"The path to the OpenShadingLanguage include directory.",
-	"/usr/include",
+	"/usr/include" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
 	"OSL_LIB_PATH",
 	"The path to the OpenShadingLanguage library directory.",
-	"/usr/lib",
+	"/usr/lib" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 # OIIO options
@@ -224,13 +227,13 @@ o.Add(
 o.Add(
 	"OIIO_INCLUDE_PATH",
 	"The path to the OpenImageIO include directory.",
-	"/usr/include",
+	"/usr/include" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
 	"OIIO_LIB_PATH",
 	"The path to the OpenImageIO library directory.",
-	"/usr/lib",
+	"/usr/lib" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
@@ -245,12 +248,12 @@ o.Add(
 o.Add(
 	"BLOSC_INCLUDE_PATH",
 	"The path to the Blosc include directory.",
-	"/usr/include",
+	"/usr/include" if Environment()["PLATFORM"] != "win32" else "",
 )
 o.Add(
 	"BLOSC_LIB_PATH",
 	"The path to the Blosc library directory.",
-	"/usr/lib",
+	"/usr/lib" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
@@ -271,7 +274,7 @@ o.Add(
 o.Add(
 	"LIBPATH",
 	"A colon separated list of paths to search for libraries on.",
-	"/usr/lib",
+	"/usr/lib" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
@@ -314,7 +317,7 @@ o.Add(
 o.Add(
 	"RMAN_ROOT",
 	"The directory in which your RenderMan renderer is installed.",
-	"/usr/local/bin",
+	"/usr/local/bin" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 # Nuke options
@@ -322,13 +325,13 @@ o.Add(
 o.Add(
 	"NUKE_ROOT",
 	"The directory in which Nuke is installed.",
-	"/usr/local/foundry/nuke"
+	"/usr/local/foundry/nuke" if Environment()["PLATFORM"] != "win32" else ""
 )
 
 o.Add(
 	"NUKE_LICENSE_FILE",
 	"The path to the FlexLM license file to use for Nuke. This is necessary to run the tests.",
-	"/usr/local/foundry/FLEXlm",
+	"/usr/local/foundry/FLEXlm" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 # OpenGL options
@@ -346,13 +349,13 @@ except NameError :
 o.Add(
 	"GLEW_INCLUDE_PATH",
 	"The path to the directory with glew.h in it.",
-	"/usr/local/include",
+	"/usr/local/include" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
 	"GLEW_LIB_PATH",
 	"The path to the directory with libGLEW in it.",
-	"/usr/local/lib",
+	"/usr/local/lib" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
@@ -367,19 +370,19 @@ o.Add(
 o.Add(
 	"MAYA_ROOT",
 	"The path to the root of the maya installation.",
-	"/usr/aw/maya",
+	"/usr/aw/maya" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
 	"MAYA_LICENSE_FILE",
 	"The path to FlexLM license file to use for Maya.",
-	"/usr/flexlm/license.dat",
+	"/usr/flexlm/license.dat" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
 	"MAYA_ADLM_ENV_FILE",
 	"The path to ADLM env xml file to use as of Maya 2010.",
-	"/usr/adlm/AdlmThinClientCustomEnv.xml",
+	"/usr/adlm/AdlmThinClientCustomEnv.xml" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 try :
@@ -443,19 +446,19 @@ o.Add(
 o.Add(
 	"ARNOLD_ROOT",
 	"The directory in which Arnold is installed.",
-	"/usr/local",
+	"/usr/local" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
 	"USD_INCLUDE_PATH",
 	"The path to the USD include directory.",
-	"/usr/local/include",
+	"/usr/local/include" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
 	"USD_LIB_PATH",
 	"The path to the USD lib directory.",
-	"/usr/local/lib",
+	"/usr/local/lib" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
@@ -480,13 +483,13 @@ o.Add(
 o.Add(
 	"ALEMBIC_INCLUDE_PATH",
 	"The path to the Alembic include directory.",
-	"/usr/local/include",
+	"/usr/local/include" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
 	"ALEMBIC_LIB_PATH",
 	"The path to the Alembic lib directory.",
-	"/usr/local/lib",
+	"/usr/local/lib" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
@@ -499,13 +502,13 @@ o.Add(
 o.Add(
 	"HDF5_INCLUDE_PATH",
 	"The path to the hdf5 include directory.",
-	"/usr/local/include",
+	"/usr/local/include" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
 	"HDF5_LIB_PATH",
 	"The path to the hdf5 lib directory.",
-	"/usr/local/lib",
+	"/usr/local/lib" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
@@ -519,13 +522,13 @@ o.Add(
 o.Add(
 	"VDB_INCLUDE_PATH",
 	"The path to the OpenVDB include directory.",
-	"/usr/local/include",
+	"/usr/local/include" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
 	"VDB_LIB_PATH",
 	"The path to the OpenVDB lib directory.",
-	"/usr/local/lib",
+	"/usr/local/lib" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
@@ -538,7 +541,7 @@ o.Add(
 o.Add(
 	"VDB_PYTHON_PATH",
 	"The path to the OpenVDB lib directory for the python bindings.",
-	"/usr/local/lib",
+	"/usr/local/lib" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 # appleseed options
@@ -546,13 +549,13 @@ o.Add(
 o.Add(
 	"APPLESEED_INCLUDE_PATH",
 	"The path to the appleseed include directory.",
-	"/usr/local/appleseed/include",
+	"/usr/local/appleseed/include" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
 	"APPLESEED_LIB_PATH",
 	"The path to the appleseed lib directory.",
-	"/usr/local/appleseed/lib",
+	"/usr/local/appleseed/lib" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 # Build options
@@ -581,7 +584,7 @@ o.Add(
 o.Add(
 	"INSTALL_PREFIX",
 	"The prefix under which to install things.",
-	"/usr/local",
+	"/usr/local" if Environment()["PLATFORM"] != "win32" else "",
 )
 
 o.Add(
@@ -954,7 +957,7 @@ o.Add(
 
 if Environment()["PLATFORM"]=="darwin" :
 	libraryPathEnvVar = "DYLD_LIBRARY_PATH"
-else :
+elif Environment()["PLATFORM"] != "win32" :
 	libraryPathEnvVar = "LD_LIBRARY_PATH"
 
 o.Add(
