@@ -1587,6 +1587,8 @@ corePythonScripts = glob.glob( "python/IECore/*.py" )
 if doConfigure :
 
 	freetypeEnv = coreEnv.Clone()
+	freetypeEnv.Replace( CXXFLAGS = [i for i in freetypeEnv["CXXFLAGS"] if i != "-DIECore_EXPORTS"])
+
 	c = Configure( freetypeEnv )
 
 	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
@@ -1715,6 +1717,8 @@ else :
 )
 
 imageEnv = coreEnv.Clone( **imageEnvSets )
+imageEnv.Replace( CXXFLAGS = [i for i in imageEnv["CXXFLAGS"] if i != "-DIECore_EXPORTS"])
+
 imageEnv.Append( **imageEnvAppends )
 imageEnv.Append( CXXFLAGS="-DIECoreImage_EXPORTS" )
 
@@ -1805,6 +1809,8 @@ if doConfigure :
 ###########################################################################################
 
 sceneEnv = coreEnv.Clone( IECORE_NAME="IECoreScene" )
+sceneEnv.Replace( CXXFLAGS = [i for i in sceneEnv["CXXFLAGS"] if i != "-DIECore_EXPORTS"])
+
 scenePythonModuleEnv = corePythonModuleEnv.Clone( IECORE_NAME="IECoreScene" )
 
 sceneSources = sorted( glob.glob( "src/IECoreScene/*.cpp" ) )
@@ -1868,6 +1874,8 @@ if doConfigure :
 ###########################################################################################
 
 vdbEnv = coreEnv.Clone( IECORE_NAME="IECoreVDB" )
+vdbEnv.Replace( CXXFLAGS = [i for i in vdbEnv["CXXFLAGS"] if i != "-DIECore_EXPORTS"])
+
 
 vdbEnvAppends = {
 	"LIBPATH" : [
@@ -1983,6 +1991,8 @@ if doConfigure :
 if doConfigure :
 
 	riDisplayDriverEnv = coreEnv.Clone( IECORE_NAME = "ieDisplay", SHLIBPREFIX="" )
+	riDisplayDriverEnv.Replace( CXXFLAGS = [i for i in riDisplayDriverEnv["CXXFLAGS"] if i != "-DIECore_EXPORTS"])
+
 	if env["PLATFORM"] != "win32" :
 		riDisplayDriverEnv.Append( CXXFLAGS = [ "-isystem", "$RMAN_ROOT/include" ] )
 	else :
@@ -2056,6 +2066,8 @@ if env["WITH_GL"] and doConfigure :
 		)
 
 	glEnv = coreEnv.Clone( **glEnvSets )
+	glEnv.Replace( CXXFLAGS = [i for i in glEnv["CXXFLAGS"] if i != "-DIECore_EXPORTS"])
+
 	glEnv.Append( **glEnvAppends )
 	glEnv.Append( CXXFLAGS = "-DIECoreGL_EXPORTS")
 
@@ -2890,6 +2902,8 @@ if doConfigure :
 ###########################################################################################
 
 arnoldEnv = coreEnv.Clone( IECORE_NAME = "IECoreArnold" )
+arnoldEnv.Replace( CXXFLAGS = [i for i in arnoldEnv["CXXFLAGS"] if i != "-DIECore_EXPORTS"])
+
 arnoldEnv.Append(
 	CXXFLAGS = [
 		"-DIECoreArnold_EXPORTS",
@@ -3053,6 +3067,7 @@ if doConfigure :
 ###########################################################################################
 
 usdEnv = pythonEnv.Clone( IECORE_NAME = "IECoreUSD" )
+usdEnv.Replace( CXXFLAGS = [i for i in usdEnv["CXXFLAGS"] if i != "-DIECore_EXPORTS"])
 
 if usdEnv["WITH_USD_MONOLITHIC"] :
 	usdLibs = [ "usd_ms" ]
@@ -3193,6 +3208,8 @@ if doConfigure :
 ###########################################################################################
 
 alembicEnv = coreEnv.Clone( IECORE_NAME = "IECoreAlembic" )
+alembicEnv.Replace( CXXFLAGS = [i for i in alembicEnv["CXXFLAGS"] if i != "-DIECore_EXPORTS"])
+
 alembicEnvAppends = {
 	"CPPPATH" : [
 		"contrib/IECoreAlembic/include",
@@ -3334,6 +3351,8 @@ if doConfigure :
 ###########################################################################################
 
 appleseedEnv = coreEnv.Clone( IECORE_NAME = "IECoreAppleseed" )
+appleseedEnv.Replace( CXXFLAGS = [i for i in appleseedEnv["CXXFLAGS"] if i != "-DIECore_EXPORTS"])
+
 appleseedEnv.Append(
 	CXXFLAGS = [
 		"-DIECoreAppleseed_EXPORTS",
