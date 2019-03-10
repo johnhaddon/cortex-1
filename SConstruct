@@ -1184,7 +1184,7 @@ def getPythonConfig( env, flags ) :
 pythonEnv = env.Clone()
 
 # decide where python is
-if pythonEnv["PYTHON"]=="" :
+if pythonEnv["PYTHON"]=="" and env["PLATFORM"] != "win32" :
 	pythonEnv["PYTHON"] = getPythonConfig( pythonEnv, "--exec-prefix" ) + "/bin/python"
 
 # try to run it to determine version
@@ -1196,7 +1196,7 @@ except :
 	Exit( 1 )
 
 # get the include path for python if we haven't been told it explicitly
-if pythonEnv["PYTHON_INCLUDE_PATH"]=="" :
+if pythonEnv["PYTHON_INCLUDE_PATH"]=="" and env["PLATFORM"] != "win32" :
 	pythonEnv["PYTHON_INCLUDE_FLAGS"] = getPythonConfig( pythonEnv, "--includes" ).split()
 else :
 	pythonEnv["PYTHON_INCLUDE_FLAGS"] = [ "-isystem", "$PYTHON_INCLUDE_PATH" ]
