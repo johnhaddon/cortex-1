@@ -208,6 +208,12 @@ o.Add(
 	"/usr/local/lib" if Environment()["PLATFORM"] != "win32" else "",
 )
 
+o.Add(
+	"PNG_LIB_PATH",
+	"The path to the PNG lib directory. Only needed for Windows.",
+	"",
+)
+
 # OSL options
 
 o.Add(
@@ -1129,6 +1135,9 @@ else:
 		CPPPATH = [
 			"include"
 		] + dependencyIncludes[1::2],
+		LIBPATH = [
+			env.subst( env["PNG_LIB_PATH"] ),
+		],
 	)
 
 	if env["WARNINGS_AS_ERRORS"] :
@@ -1735,6 +1744,8 @@ if doConfigure :
 
 		if "-DIECORE_WITH_FREETYPE" in imageEnv["CPPFLAGS"] :
 			imageEnv.Append( LIBS = "freetype" )
+			if env["PLATFORM"] == "win32":
+				imageEnv.Append( LIBS = ["libpng"] )
 		else :
 			imageSources.remove( "src/IECoreImage/Font.cpp" )
 			imagePythonSources.remove( "src/IECoreImageBindings/FontBinding.cpp" )
@@ -1810,6 +1821,8 @@ if doConfigure :
 
 	if "-DIECORE_WITH_FREETYPE" in sceneEnv["CPPFLAGS"] :
 		sceneEnv.Append( LIBS = "freetype" )
+		if env["PLATFORM"] == "win32":
+			sceneEnv.Append( LIBS = ["libpng"] )
 	else :
 		sceneSources.remove( "src/IECoreScene/Font.cpp" )
 		scenePythonModuleSources.remove( "src/IECoreScene/bindings/FontBinding.cpp" )
@@ -2084,6 +2097,8 @@ if env["WITH_GL"] and doConfigure :
 		glPythonSources = sorted( glob.glob( "src/IECoreGL/bindings/*.cpp" ) )
 		if "-DIECORE_WITH_FREETYPE" in glEnv["CPPFLAGS"] :
 			glEnv.Append( LIBS = "freetype" )
+			if env["PLATFORM"] == "win32":
+				glEnv.Append( LIBS = ["libpng"] )
 		else :
 			glSources.remove( "src/IECoreGL/Font.cpp" )
 			glSources.remove( "src/IECoreGL/FontLoader.cpp" )
