@@ -1203,7 +1203,7 @@ if doConfigure :
 	# figure out the boost version in use so we can append it to the
 	# library names	if necessary
 	boostVersion = None
-	boostVersionHeader = env.FindFile( "boost/version.hpp", env["CXXFLAGS"] )
+	boostVersionHeader = env.FindFile( "boost/version.hpp", dependencyIncludes )
 	if (boostVersionHeader ==None):
 		sys.stderr.write( "ERROR : unable to find the boost headers, check BOOST_INCLUDE_PATH.\n" )
 		Exit( 1 )
@@ -1318,9 +1318,8 @@ except :
 # get the include path for python if we haven't been told it explicitly
 if pythonEnv["PYTHON_INCLUDE_PATH"]=="" and env["PLATFORM"] != "win32" :
 	pythonEnv["PYTHON_INCLUDE_FLAGS"] = getPythonConfig( pythonEnv, "--includes" ).split()
-else :
+elif env["PLATFORM"] :
 	pythonEnv["PYTHON_INCLUDE_FLAGS"] = [ "-isystem", "$PYTHON_INCLUDE_PATH" ]
-pythonEnv.Append( CXXFLAGS = "$PYTHON_INCLUDE_FLAGS" )
 
 if pythonEnv["PLATFORM"] != "win32":
 	pythonEnv.Append( CXXFLAGS = "$PYTHON_INCLUDE_FLAGS" )
@@ -1681,9 +1680,6 @@ imageEnvSets = {
 
 imageEnvAppends = {
 
-	"CXXFLAGS" : [
-		"-isystem", "$OIIO_INCLUDE_PATH",
-	],
 	"LIBPATH" : [
 		"$OIIO_LIB_PATH",
 	],
@@ -1691,6 +1687,23 @@ imageEnvAppends = {
 		"boost_signals" + env["BOOST_LIB_SUFFIX"],
 	],
 }
+
+if env["PLATFORM"] != "win32" :
+	imageEnvAppends.update(
+		{
+			"CXXFLAGS" : [
+				"-isystem", "$OIIO_INCLUDE_PATH",
+			],
+		}
+	)
+else :
+	imageEnvAppends.update(
+		{
+			"CPPPATH" : [
+				"$OIIO_INCLUDE_PATH"
+			]
+		}
+)
 
 imageEnv = coreEnv.Clone( **imageEnvSets )
 imageEnv.Append( **imageEnvAppends )
@@ -1844,14 +1857,26 @@ if doConfigure :
 vdbEnv = coreEnv.Clone( IECORE_NAME="IECoreVDB" )
 
 vdbEnvAppends = {
-	"CXXFLAGS" : [
-		"-isystem", "$VDB_INCLUDE_PATH",
-	],
 	"LIBPATH" : [
 		"$VDB_LIB_PATH",
 	],
 	"LIBS" : ["openvdb$VDB_LIB_SUFFIX"]
 }
+
+if env["PLATFORM"] != "win32" :
+	vdbEnvAppends.update(
+		{
+			"CXXFLAGS" : [
+				"-isystem", "$VDB_INCLUDE_PATH",
+			],
+		}
+	)
+else :
+	vdbEnvAppends.update(
+		{
+			"CPPPATH" : "VDB_INCLUDE_PATH",
+		}
+	)
 
 vdbEnv.Append( **vdbEnvAppends )
 
@@ -1945,7 +1970,14 @@ if doConfigure :
 if doConfigure :
 
 	riDisplayDriverEnv = coreEnv.Clone( IECORE_NAME = "ieDisplay", SHLIBPREFIX="" )
-	riDisplayDriverEnv.Append( CXXFLAGS = [ "-isystem", "$RMAN_ROOT/include" ] )
+	if env["PLATFORM"] != "win32" :
+		riDisplayDriverEnv.Append( CXXFLAGS = [ "-isystem", "$RMAN_ROOT/include" ] )
+	else :
+		riDisplayDriverEnv.Append(
+			CPPPATH = [
+				"$RMAN_ROOT/include",
+			]
+		)
 
 	c = Configure( riDisplayDriverEnv )
 	if not c.CheckCXXHeader( "ndspy.h" ) :
@@ -1987,17 +2019,28 @@ if env["WITH_GL"] and doConfigure :
 
 	glEnvAppends = {
 
-		"CXXFLAGS" : [
-			"-isystem", "$GLEW_INCLUDE_PATH",
-			# These are to work around warnings in boost::wave
-			# while still using -Werror.
-			"-Wno-format",
-			"-Wno-strict-aliasing",
-		],
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",
 		],
 	}
+	if env["PLATFORM"] != "win32" :
+		glEnvAppends.update(
+			{
+				"CXXFLAGS" : [
+					"-isystem", "$GLEW_INCLUDE_PATH",
+					# These are to work around warnings in boost::wave
+					# while still using -Werror.
+					"-Wno-format",
+					"-Wno-strict-aliasing",
+				],
+			}
+		)
+	else :
+		glEnvAppends.update(
+			{
+				"CPPPATH" : "$GLEW_INCLUDE_PATH",
+			}
+		)
 
 	glEnv = coreEnv.Clone( **glEnvSets )
 	glEnv.Append( **glEnvAppends )
@@ -2124,7 +2167,6 @@ mayaEnvSets = {
 
 mayaEnvAppends = {
 	"CXXFLAGS" : [
-		"-isystem", "$GLEW_INCLUDE_PATH",
 		"-DIECoreMaya_EXPORTS",
 	],
 	"LIBS" : [
@@ -2140,6 +2182,17 @@ mayaEnvAppends = {
 		pythonEnv["PYTHON_INCLUDE_FLAGS"],
 	],
 }
+
+if env["PLATFORM"] != "win32" :
+	mayaEnvAppends["CXXFLAGS"] += [
+		"-isystem", "$GLEW_INCLUDE_PATH",
+	]
+else :
+	mayaEnvAppends.update(
+		{
+			"CPPPATH" : "$GLEW_INCLUDE_PATH",
+		}
+	)
 
 if env["PLATFORM"]=="posix" :
 	mayaEnvAppends["CPPFLAGS"] += ["-DLINUX"]
@@ -2334,17 +2387,8 @@ if doConfigure :
 
 nukeEnvAppends = {
 
-	"CXXFLAGS" : [
-		"-isystem", "$NUKE_ROOT/include",
-		"-isystem", "$GLEW_INCLUDE_PATH",
-	],
-
 	"CPPFLAGS" : [
 		pythonEnv["PYTHON_INCLUDE_FLAGS"],
-	],
-
-	"LINKFLAGS" : [
-		"-Wl,-rpath-link=$NUKE_ROOT",
 	],
 
 	"LIBPATH" : [
@@ -2356,6 +2400,29 @@ nukeEnvAppends = {
 	]
 
 }
+
+if env["PLATFORM"] != "win32" :
+	nukeEnvAppends.update(
+		{
+			"CXXFLAGS" : [
+				"-isystem", "$NUKE_ROOT/include",
+				"-isystem", "$GLEW_INCLUDE_PATH",
+			],
+			"LINKFLAGS" : [
+				"-Wl,-rpath-link=$NUKE_ROOT",
+			],
+		}
+	)
+else :
+	nukeEnvAppends.update(
+		{
+			"CPPPATH" : 
+			[
+				"$NUKE_ROOT/include",
+				"$GLEW_INCLUDE_PATH",
+			]
+		}
+	)
 
 if env["PLATFORM"] == "darwin" :
 	# FN_OS_MAC is required to work around isnan errors in DDImage/Matrix4.h
@@ -2552,11 +2619,7 @@ houdiniEnvSets = {
 }
 
 houdiniEnvAppends = {
-	"CXXFLAGS" : [
-		"-isystem", "$GLEW_INCLUDE_PATH",
-		"-isystem", "$HOUDINI_INCLUDE_PATH",
-		"-std=$CXXSTD",
-	],
+	
 	"CPPFLAGS" : [
 		pythonEnv["PYTHON_INCLUDE_FLAGS"],
 	],
@@ -2581,8 +2644,36 @@ houdiniEnvAppends = {
 	]
 }
 
+if env["PLATFORM"] != "win32" :
+	houdiniEnvAppends.update(
+		{
+			"CXXFLAGS" : [
+				"-isystem", "$GLEW_INCLUDE_PATH",
+				"-isystem", "$HOUDINI_INCLUDE_PATH",
+				"-std=$CXXSTD",
+			],
+		}
+	)
+else : 
+	houdiniEnvAppends.update(
+		{
+			"CPPPATH" : 
+			[
+				"$GLEW_INCLUDE_PATH",
+				"$HOUDINI_INCLUDE_PATH",
+			]
+		}
+	)
+
 if env["WITH_GL"] :
-	houdiniEnvAppends["CXXFLAGS"].extend( [ "-isystem", "$GLEW_INCLUDE_PATH" ] )
+	if env["PLATFORM"] != "win32" :
+		houdiniEnvAppends["CXXFLAGS"].extend( [ "-isystem", "$GLEW_INCLUDE_PATH" ] )
+	else :
+		houdiniEnvAppends["CPPPATH"].extend(
+			[
+				"$GLEW_INCLUDE_PATH",
+			]
+		)
 	houdiniEnvAppends["LIBPATH"].append( "$GLEW_LIB_PATH" )
 	houdiniEnvAppends["LIBS"].append( "GLEW$GLEW_LIB_SUFFIX" )
 
@@ -2786,26 +2877,51 @@ if doConfigure :
 arnoldEnv = coreEnv.Clone( IECORE_NAME = "IECoreArnold" )
 arnoldEnv.Append(
 	CXXFLAGS = [
-		"-isystem", "$ARNOLD_ROOT/include",
 		"-DIECoreArnold_EXPORTS",
 	],
 	CPPPATH = [
 		"contrib/IECoreArnold/include",
-	]
+	],
+	LIBPATH = [ 
+		"$ARNOLD_ROOT/bin" ,
+	],
 )
-arnoldEnv.Append( LIBPATH = [ "$ARNOLD_ROOT/bin" ] )
+if env["PLATFORM"] != "win32" :
+	arnoldEnv.Append(
+		CXXFLAGS = [
+			"-isystem", "$ARNOLD_ROOT/include",
+		]
+	)
+else :
+	arnoldEnv.Append(
+		CPPPATH = [
+			"$ARNOLD_ROOT/include",
+		]
+	)
 
 arnoldPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreArnold" )
 arnoldPythonModuleEnv.Append(
-	CXXFLAGS = [
-		"-isystem", "$ARNOLD_ROOT/include",
-	],
+	
 	CPPPATH = [
 		"contrib/IECoreArnold/include",
 		"contrib/IECoreArnold/include/bindings",
-	]
+	],
+	LIBPATH = [
+		"$ARNOLD_ROOT/bin",
+	],
 )
-arnoldPythonModuleEnv.Append( LIBPATH = [ "$ARNOLD_ROOT/bin" ] )
+if env["PLATFORM"] != "win32" :
+	arnoldPythonModuleEnv.Append(
+		CXXFLAGS = [
+			"-isystem", "$ARNOLD_ROOT/include",
+		],
+	)
+else :
+	arnoldPythonModuleEnv.Append(
+		CPPPATH = [
+			"$ARNOLD_ROOT/include",
+		]
+	)
 
 arnoldDriverEnv = arnoldEnv.Clone( IECORE_NAME = "ieOutputDriver" )
 arnoldDriverEnv["SHLIBPREFIX"] = ""
@@ -2948,19 +3064,30 @@ if usdEnv["USD_LIB_PREFIX"] :
 
 usdEnvAppends = {
 	"CXXFLAGS" : [
-		"-isystem", "$USD_INCLUDE_PATH",
 		"-DBUILD_COMPONENT_SRC_PREFIX=",
 		"-DBUILD_OPTLEVEL_DEV",
-		"-Wno-deprecated"
 	],
 	"CPPPATH" : [
-		"contrib/IECoreUSD/include"
+		"contrib/IECoreUSD/src"
 	],
 	"LIBPATH" : [
 		"$USD_LIB_PATH"
 	],
 	"LIBS" : usdLibs,
 }
+if env["PLATFORM"] != "win32" :
+	usdEnvAppends["CXXFLAGS"].extend(
+		[
+			"-isystem", "$USD_INCLUDE_PATH",
+			"-Wno-deprecated",
+		]
+	)
+else :
+	usdEnvAppends["CPPPATH"].extend(
+		[
+			"$USD_INCLUDE_PATH",
+		]
+	)
 
 usdEnv.Append( **usdEnvAppends )
 
@@ -3052,10 +3179,6 @@ if doConfigure :
 
 alembicEnv = coreEnv.Clone( IECORE_NAME = "IECoreAlembic" )
 alembicEnvAppends = {
-	"CXXFLAGS" : [
-		"-isystem", "$ALEMBIC_INCLUDE_PATH",
-		"-isystem", "$HDF5_INCLUDE_PATH",
-	],
 	"CPPPATH" : [
 		"contrib/IECoreAlembic/include",
 	],
@@ -3067,6 +3190,22 @@ alembicEnvAppends = {
 		"hdf5$HDF5_LIB_SUFFIX",
 	],
 }
+if env["PLATFORM"] != "win32" :
+	alembicEnvAppends.update(
+		{
+			"CXXFLAGS" : [
+				"-isystem", "$ALEMBIC_INCLUDE_PATH",
+				"-isystem", "$HDF5_INCLUDE_PATH",
+			],
+		}
+	)
+else :
+	alembicEnvAppends["CPPPATH"].extend(
+		[
+			"$ALEMBIC_INCLUDE_PATH",
+			"$HDF5_INCLUDE_PATH",
+		]
+	)
 alembicEnv.Append( **alembicEnvAppends )
 alembicEnv.Append( CXXFLAGS = "-DIECoreAlembic_EXPORTS" )
 
@@ -3182,9 +3321,6 @@ if doConfigure :
 appleseedEnv = coreEnv.Clone( IECORE_NAME = "IECoreAppleseed" )
 appleseedEnv.Append(
 	CXXFLAGS = [
-		"-isystem", "$APPLESEED_INCLUDE_PATH",
-		"-isystem", "$OSL_INCLUDE_PATH",
-		"-isystem", "$OIIO_INCLUDE_PATH",
 		"-DIECoreAppleseed_EXPORTS",
 	],
 	CPPPATH = [
@@ -3195,15 +3331,27 @@ appleseedEnv.Append(
 		"-DAPPLESEED_USE_SSE",
 	],
 )
+if env["PLATFORM"] != "win32" :
+    appleseedEnv.Append(
+        CXXFLAGS = [
+            "-isystem", "$APPLESEED_INCLUDE_PATH",
+            "-isystem", "$OSL_INCLUDE_PATH",
+            "-isystem", "$OIIO_INCLUDE_PATH",
+        ]
+    )
+else:
+	appleseedEnv.Append(
+		CPPPATH = [
+			"$APPLESEED_INCLUDE_PATH",
+			"$OSL_INCLUDE_PATH",
+			"$OIIO_INCLUDE_PATH",
+		]
+	)
 appleseedEnv.Append( LIBPATH = [ "$APPLESEED_LIB_PATH", "$OSL_LIB_PATH", "$OIIO_LIB_PATH" ] )
 
 appleseedPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreAppleseed" )
 appleseedPythonModuleEnv.Append(
-	CXXFLAGS = [
-		"-isystem", "$APPLESEED_INCLUDE_PATH",
-		"-isystem", "$OSL_INCLUDE_PATH",
-		"-isystem", "$OIIO_INCLUDE_PATH",
-	],
+	
 	CPPPATH = [
 		"contrib/IECoreAppleseed/include",
 		"contrib/IECoreAppleseed/include/bindings",
@@ -3218,6 +3366,22 @@ appleseedPythonModuleEnv.Append(
 		"$OIIO_LIB_PATH"
 	],
 )
+if env["PLATFORM"] != "win32" :
+	appleseedPythonModuleEnv.Append(
+		CXXFLAGS = [
+			"-isystem", "$APPLESEED_INCLUDE_PATH",
+			"-isystem", "$OSL_INCLUDE_PATH",
+			"-isystem", "$OIIO_INCLUDE_PATH",
+		],
+	)
+else:
+	appleseedPythonModuleEnv.Append(
+		CPPPATH = [
+			"$APPLESEED_INCLUDE_PATH",
+			"$OSL_INCLUDE_PATH",
+			"$OIIO_INCLUDE_PATH",
+		]
+	)
 
 
 appleseedDriverEnv = appleseedEnv.Clone( IECORE_NAME = "ieDisplay" )
