@@ -2932,6 +2932,9 @@ else :
 	arnoldEnv.Append(
 		CPPPATH = [
 			"$ARNOLD_ROOT/include",
+		],
+		LIBPATH = [
+			"$ARNOLD_ROOT/lib"
 		]
 	)
 
@@ -2956,6 +2959,9 @@ else :
 	arnoldPythonModuleEnv.Append(
 		CPPPATH = [
 			"$ARNOLD_ROOT/include",
+		],
+		LIBPATH = [
+			"$ARNOLD_ROOT/lib"
 		]
 	)
 
