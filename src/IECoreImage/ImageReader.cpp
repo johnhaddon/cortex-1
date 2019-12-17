@@ -60,6 +60,29 @@ using namespace IECoreImage;
 
 IE_CORE_DEFINERUNTIMETYPED( ImageReader );
 
+namespace
+{
+
+#if OIIO_VERSION > 20000
+
+using ImageInputPtr = ImageInput::unique_ptr;
+ImageInputPtr createImageInput( const std::string &filename )
+{
+	return ImageInput::create( filename );
+}
+
+#else
+
+using ImageInputPtr = unique_ptr<ImageInput, decltype(&ImageInput::destroy)>;
+ImageInputPtr createImageInput( const std::string &filename )
+{
+	return ImageInputPtr( ImageInput::create( fileName ), &ImageInput::destroy );
+}
+
+#endif
+
+} // namespace
+
 ////////////////////////////////////////////////////////////////////////////////
 // ImageReader::Implementation
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,10 +105,10 @@ class ImageReader::Implementation
 		{
 			bool result = false;
 
-			if( ImageInput *input = ImageInput::create( filename ) )
+			ImageInputPtr input = createImageInput( filename );
+			if( input )
 			{
 				result = input->valid_file( filename );
-				ImageInput::destroy( input );
 			}
 
 			return result;
@@ -106,7 +129,7 @@ class ImageReader::Implementation
 				if( isDeep() )
 				{
 					DeepData deepData;
-					ImageInput *input = ImageInput::open( m_inputFileName.c_str() );
+					std::unique_ptr<ImageInput> input( ImageInput::open( m_inputFileName.c_str() ) );
 
 					// Note that the spec we get from the image cache has a tiling setting
 					// based on the caching settings, not the file on disk, so we have to
