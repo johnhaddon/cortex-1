@@ -311,13 +311,20 @@ class DisplayTileCallback : public ProgressTileCallback
 			}
 		}
 
-		void on_progressive_frame_update( const asr::Frame* frame ) override
+void on_progressive_frame_update(
+        const asr::Frame&            frame,
+        const double            time,
+        const std::uint64_t     samples,
+        const double            samples_per_pixel,
+        const std::uint64_t     samples_per_second) override
+
+		//void on_progressive_frame_update( const asr::Frame* frame ) override
 		{
-			const asf::CanvasProperties &frame_props = frame->image().properties();
+			const asf::CanvasProperties &frame_props = frame.image().properties();
 
 			for( const auto &layer : *m_layers )
 			{
-				layer->initDisplay( frame );
+				layer->initDisplay( &frame );
 			}
 
 			for( size_t ty = 0; ty < frame_props.m_tile_count_y; ++ty )
