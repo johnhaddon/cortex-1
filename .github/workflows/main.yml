@@ -1,14 +1,6 @@
 name: CI
 
-on:
-  push:
-    branches:
-      - master
-      - '*_maintenance'
-  pull_request:
-    branches:
-      - master
-      - '*_maintenance'
+on: [push]
 
 jobs:
 
@@ -47,7 +39,7 @@ jobs:
           - name: linux
             os: ubuntu-16.04
             buildType: RELEASE
-            containerImage: gafferhq/build:1.0.0
+            containerImage: docker.pkg.github.com/gafferhq/build/build:1.1.0
             options: config/azure/options.linux
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.0.0a1/gafferDependencies-2.0.0-Python2-linux.tar.gz
 
