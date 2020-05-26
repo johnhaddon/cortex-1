@@ -89,22 +89,31 @@ template<unsigned int N>
 struct KDTreeTestSuite : public boost::unit_test::test_suite
 {
 
-	KDTreeTestSuite() : boost::unit_test::test_suite("KDTreeTestSuite")
+	KDTreeTestSuite()
+		: boost::unit_test::test_suite( "KDTreeTestSuite" + std::to_string( N ) )
 	{
-		addTest<Imath::V3f>();
-		addTest<Imath::V3d>();
-		addTest<Imath::V2f>();
-		addTest<Imath::V2d>();
+		addTest<Imath::V3f>( "V3f" );
+		addTest<Imath::V3d>( "V3d" );
+		addTest<Imath::V2f>( "V2f" );
+		addTest<Imath::V2d>( "V2d" );
 	}
 
 	template<typename T>
-	void addTest()
+	void addTest( const std::string &nameSuffix )
 	{
 		static boost::shared_ptr<KDTreeTest<T> > instance(new KDTreeTest<T>(N));
 
-		add( BOOST_CLASS_TEST_CASE( &KDTreeTest<T>::testNearestNeighour, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &KDTreeTest<T>::testNearestNeighours, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &KDTreeTest<T>::testNearestNNeighours, instance ) );
+		auto test = BOOST_CLASS_TEST_CASE( &KDTreeTest<T>::testNearestNeighour, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
+
+		test = BOOST_CLASS_TEST_CASE( &KDTreeTest<T>::testNearestNeighours, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
+
+		test = BOOST_CLASS_TEST_CASE( &KDTreeTest<T>::testNearestNNeighours, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
 	}
 };
 
