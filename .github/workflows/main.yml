@@ -6,6 +6,7 @@ on:
     branches:
       - master
       - '*_maintenance'
+      - '*'
   pull_request:
     branches:
       - master
@@ -137,8 +138,7 @@ jobs:
       # containing the hash of the archive, for use in the cache key
       # below.
       run: |
-        echo CORTEX_DEPENDENCIES_HASH=`python config/installDependencies.py --archiveURL ${{ matrix.dependenciesURL }} --dependenciesDir ./dependencies --outputFormat "{archiveDigest}"` >> $GITHUB_ENV
-        echo CORTEX_DEPENDENCIES_DIR=./dependencies >> $GITHUB_ENV
+        echo CORTEX_DEPENDENCIES_HASH=`python config/installDependencies.py --archiveURL ${{ matrix.dependenciesURL }} --dependenciesDir ${{ env.CORTEX_BUILD_NAME }} --outputFormat "{archiveDigest}"` >> $GITHUB_ENV
       shell: bash
 
     - name: Install renderers
