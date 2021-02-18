@@ -3041,7 +3041,6 @@ if doConfigure :
 
 		arnoldDriverEnv.Append(
 			LIBS = [
-				"ai",
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( arnoldEnv.subst( "$INSTALL_LIB_NAME" ) ),
