@@ -2995,6 +2995,10 @@ arnoldPythonModuleEnv.Append(
 arnoldDriverEnv = arnoldEnv.Clone( IECORE_NAME = "ieOutputDriver" )
 arnoldDriverEnv["SHLIBPREFIX"] = ""
 arnoldDriverEnv["SHLIBSUFFIX"] = ".so" if env["PLATFORM"] != "win32" else ".dll"
+if env["PLATFORM"]=="darwin" :
+	# Symbols we need from `libai.dylib` will be resolved at runtime when Arnold
+	# loads the driver.
+	arnoldDriverEnv.Append( LINKFLAGS = "-Wl,-undefined,dynamic_lookup" )
 
 haveArnold = False
 
