@@ -132,8 +132,10 @@ static IndexedIO::EntryID g_valueEntry("value");
 		h.append( v.scalePivotTranslation );\
 		h.append( v.rotatePivot );\
 		h.append( v.rotationOrientation );\
-		h.append( v.rotate );\
-		h.append( v.rotate.order() );\
+		h.append( v.rotate.x );\
+		h.append( v.rotate.y );\
+		h.append( v.rotate.z );\
+		h.append( (int)v.rotate.order() );\
 		h.append( v.rotatePivotTranslation );\
 		h.append( v.translate );\
 	}\

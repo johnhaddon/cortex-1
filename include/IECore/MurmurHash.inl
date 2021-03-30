@@ -131,6 +131,12 @@ inline void MurmurHash::append( const void *data, size_t bytes, int elementSize 
 	m_h2 = h2;
 }
 
+inline MurmurHash &MurmurHash::append( bool data )
+{
+	append( &data, sizeof( bool ), sizeof( bool ) );
+	return *this;
+}
+
 inline MurmurHash &MurmurHash::append( char data )
 {
 	append( &data, sizeof( char ), sizeof( char ) );
@@ -600,6 +606,12 @@ inline uint64_t MurmurHash::h1() const
 inline uint64_t MurmurHash::h2() const
 {
 	return m_h2;
+}
+
+template<typename T, typename Enabler = typename std::is_enum<T>::type>
+void murmurHashAppend( MurmurHash &h, T value )
+{
+	h.append( static_cast<std::underlying_type_t<T>>( value ) );
 }
 
 /// Implementation of tbb_hasher for MurmurHash, allowing MurmurHash to be used

@@ -75,6 +75,7 @@ class IECORE_API MurmurHash
 		// Construct directly from known internal values
 		MurmurHash( uint64_t h1, uint64_t h2 );
 
+		inline MurmurHash &append( bool data );
 		inline MurmurHash &append( char data );
 		inline MurmurHash &append( unsigned char data );
 		inline MurmurHash &append( short data );
@@ -148,6 +149,13 @@ class IECORE_API MurmurHash
 		inline MurmurHash &append( const Imath::Box3d *data, size_t numElements );
 		inline MurmurHash &append( const Imath::Quatf *data, size_t numElements );
 		inline MurmurHash &append( const Imath::Quatd *data, size_t numElements );
+
+		template<typename T>
+		inline MurmurHash &append( const T &data )
+		{
+			murmurHashAppend( *this, data );
+			return *this;
+		}
 
 		inline const MurmurHash &operator = ( const MurmurHash &other );
 
